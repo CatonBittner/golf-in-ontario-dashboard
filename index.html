@@ -713,7 +713,16 @@ function renderCourses(){
   });
   el.innerHTML=h;
 }
-function pickCourse(idx){selC=courses[idx]||null;renderCourses();showCourse();}
+function pickCourse(idx){
+  selC=courses[idx]||null;
+  renderCourses();
+  showCourse();
+  // on mobile, scroll down to the detail panel
+  if(window.innerWidth<=768){
+    var right=document.getElementById('gc-right');
+    if(right){setTimeout(function(){right.scrollIntoView({behavior:'smooth',block:'start'});},80);}
+  }
+}
 function showCourse(){
   var empty=document.getElementById('gc-empty'),detail=document.getElementById('gc-detail');
   if(!selC){empty.style.display='flex';detail.style.display='none';return;}
@@ -743,7 +752,9 @@ function showCourse(){
     rel.forEach(function(p){relH+='<div class="gdpr"><div class="gdpdot" style="background:'+sttColor(p.status)+'"></div><div class="gdpcap">'+p.caption+'</div><div class="gdpdate">'+fmtShort(p.date)+'</div><div class="ib" onclick="openModal(null,'+p.id+')" style="margin-left:8px;">&#9999;</div></div>';});
     relH+='</div>';
   }else{relH='<div class="noposts">No tagged posts for this course yet.</div>';}
-  detail.innerHTML='<div style="padding:24px 28px;">'
+  var backBtn='<button onclick="clearCourse()" style="display:none;" id="gc-back" class="btn bgh" style="margin-bottom:14px;">&#8592; Back to courses</button>';
+  if(window.innerWidth<=768){backBtn='<button onclick="clearCourse()" class="btn bgh" style="margin:16px 28px 0;display:flex;">&#8592; Back to list</button>';}
+  detail.innerHTML=backBtn+'<div style="padding:24px 28px;">'
     +'<div class="gdhdr"><div><div class="gdname">'+c.name+'</div><div class="gdreg">&#128205; '+c.region+' &middot; Ontario</div></div>'
     +'<span class="fbadge '+(c.footage?'fyes':'fno')+'">'+(c.footage?'&#9679; Has Footage':'&#9675; No Footage Yet')+'</span></div>'
     +embed
@@ -752,6 +763,15 @@ function showCourse(){
     +'<div class="gdstat"><div class="gdsl">Region</div><div class="gdsv" style="font-size:11px;line-height:1.6;margin-top:5px;">'+c.region+'</div></div>'
     +'<div class="gdstat"><div class="gdsl">Footage</div><div class="gdsv" style="font-size:12px;margin-top:6px;color:'+(c.footage?'var(--green)':'var(--t3)')+';">'+(c.footage?'Available':'Pending')+'</div></div>'
     +'</div>'+relH+'</div>';
+}
+function clearCourse(){
+  selC=null;
+  renderCourses();
+  showCourse();
+  if(window.innerWidth<=768){
+    var left=document.getElementById('gc-left');
+    if(left){setTimeout(function(){left.scrollIntoView({behavior:'smooth',block:'start'});},80);}
+  }
 }
 function linkFolder(){
   var raw=document.getElementById('dl-input').value.trim(),msg=document.getElementById('dl-msg');
