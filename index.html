@@ -42,10 +42,12 @@ body{overflow:hidden;}
   .cal-body{overflow-y:visible!important;flex:none!important;}
   .cal-ctrl{flex-direction:column;align-items:flex-start;gap:10px;}
   .stat-row{grid-template-columns:repeat(2,1fr);}
-  #gc-panels{flex-direction:column;height:auto!important;}
-  #gc-left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--b1);max-height:320px;overflow:visible!important;}
-  #gc-list{max-height:220px;overflow-y:auto;}
-  #gc-right{min-height:60vh;}
+  #gc-panels{flex-direction:column;height:auto!important;overflow:visible!important;}
+  #gc-left{width:100%;min-width:0;border-right:none;border-bottom:none;max-height:none!important;overflow:visible!important;}
+  #gc-lh{position:sticky;top:0;z-index:10;background:var(--bg1);}
+  #gc-list{max-height:none!important;overflow-y:visible!important;}
+  #gc-right{min-height:60vh;border-top:1px solid var(--b1);}
+  #page-courses{overflow:visible!important;}
   #gc-empty{min-height:200px;}
   #day-panel{width:100%;right:-110%;}
   #day-panel.open{right:0;}
