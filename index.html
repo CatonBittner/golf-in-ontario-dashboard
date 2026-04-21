@@ -186,17 +186,26 @@ body{overflow:hidden;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
 #page-courses{overflow:hidden;}
-#gc-panels{display:flex;height:calc(100vh - var(--tb));overflow:visible;}
-#gc-left{width:272px;min-width:272px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:visible;}
-#gc-lh{padding:14px;border-bottom:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:8px;overflow:visible;position:relative;z-index:10;}
+#gc-panels{display:flex;height:calc(100vh - var(--tb));overflow:hidden;}
+#gc-left{width:272px;min-width:272px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden;}
+#gc-lh{padding:14px;border-bottom:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
 #gc-list{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px;}
-#gc-region{position:relative;z-index:20;}
 #gc-search{background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:8px 12px;color:var(--t1);font-size:12px;font-family:var(--font);outline:none;width:100%;}
 #gc-search::placeholder{color:var(--t3);}
 #gc-search:focus{border-color:var(--green);}
-#gc-region{background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:8px 12px;color:var(--t1);font-size:12px;font-family:var(--font);outline:none;width:100%;cursor:pointer;}
-#gc-region option{background:var(--bg3);}
-#gc-list{flex:1;overflow-y:auto;padding:8px;}
+/* custom region dropdown */
+#gc-region{display:none;}
+.cdd-wrap{position:relative;width:100%;}
+.cdd-btn{background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:8px 12px;color:var(--t2);font-size:12px;font-family:var(--font);width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;transition:border-color .13s;}
+.cdd-btn:hover,.cdd-btn.open{border-color:var(--green);color:var(--t1);}
+.cdd-arrow{font-size:10px;opacity:.5;transition:transform .15s;flex-shrink:0;}
+.cdd-btn.open .cdd-arrow{transform:rotate(180deg);}
+.cdd-list{position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--b2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);overflow-y:auto;max-height:320px;min-width:200px;}
+.cdd-item{padding:9px 14px;font-size:12px;font-family:var(--font);color:var(--t2);cursor:pointer;transition:background .1s;}
+.cdd-item:hover{background:var(--bg3);color:var(--t1);}
+.cdd-item.selected{color:var(--green);background:var(--gd);}
+.cdd-item.cdd-region-hdr{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;padding:10px 14px 4px;cursor:default;pointer-events:none;}
+.cdd-item.cdd-region-hdr:hover{background:transparent;}
 .grl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 3px;}
 .gri{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background .12s;margin-bottom:1px;user-select:none;}
 .gri:hover{background:var(--bg3);}
@@ -320,7 +329,7 @@ body{overflow:hidden;}
       <div id="gc-left">
         <div id="gc-lh">
           <input id="gc-search" type="text" placeholder="Search courses..." oninput="renderCourses()">
-          <select id="gc-region" onchange="renderCourses()">
+          <select id="gc-region" onchange="renderCourses()" style="display:none;">
             <option value="">All Regions</option>
             <option>Bay of Quinte</option><option>Kingston</option><option>London</option>
             <option>Muskoka</option><option>Niagara</option><option>Simcoe County</option>
@@ -328,6 +337,13 @@ body{overflow:hidden;}
             <option>The Great Canadian Wilderness</option>
             <option>Windsor</option><option>York Durham Headwaters</option>
           </select>
+          <div class="cdd-wrap" id="cdd-wrap">
+            <button class="cdd-btn" id="cdd-btn" onclick="toggleCDD(event)">
+              <span id="cdd-label">All Regions</span>
+              <span class="cdd-arrow">&#9660;</span>
+            </button>
+            <div class="cdd-list" id="cdd-list" style="display:none;"></div>
+          </div>
         </div>
         <div id="gc-list"></div>
       </div>
@@ -740,6 +756,68 @@ function linkFolder(){
 }
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeDP();closeModal();closeSB();}});
+
+
+// ── CUSTOM REGION DROPDOWN ──────────────────────────────────────────────────
+var CDD_REGIONS = ['All Regions','Bay of Quinte','Kingston','London','Muskoka','Niagara','Simcoe County','Sudbury & South Western Ontario','The Great Canadian Wilderness','Windsor','York Durham Headwaters'];
+var cddOpen = false;
+
+function buildCDDList(){
+  var list = document.getElementById('cdd-list');
+  if(!list) return;
+  var h = '';
+  CDD_REGIONS.forEach(function(r, i){
+    var val = i === 0 ? '' : r;
+    var sel = document.getElementById('gc-region').value === val;
+    h += '<div class="cdd-item'+(sel?' selected':'')+'" onclick="pickCDDRegion(''+val+'',''+r+'')">'+r+'</div>';
+  });
+  list.innerHTML = h;
+}
+
+function toggleCDD(e){
+  if(e) e.stopPropagation();
+  cddOpen = !cddOpen;
+  var btn = document.getElementById('cdd-btn');
+  var list = document.getElementById('cdd-list');
+  if(!btn || !list) return;
+  if(cddOpen){
+    buildCDDList();
+    // position the list fixed relative to the button
+    var rect = btn.getBoundingClientRect();
+    list.style.top = (rect.bottom + 4) + 'px';
+    list.style.left = rect.left + 'px';
+    list.style.width = rect.width + 'px';
+    list.style.display = 'block';
+    btn.classList.add('open');
+  } else {
+    closeCDD();
+  }
+}
+
+function closeCDD(){
+  cddOpen = false;
+  var btn = document.getElementById('cdd-btn');
+  var list = document.getElementById('cdd-list');
+  if(btn) btn.classList.remove('open');
+  if(list) list.style.display = 'none';
+}
+
+function pickCDDRegion(val, label){
+  document.getElementById('gc-region').value = val;
+  document.getElementById('cdd-label').textContent = label;
+  closeCDD();
+  renderCourses();
+}
+
+document.addEventListener('click', function(e){
+  if(cddOpen && !e.target.closest('#cdd-wrap') && !e.target.closest('#cdd-list')){
+    closeCDD();
+  }
+});
+
+window.addEventListener('resize', function(){
+  if(cddOpen) closeCDD();
+});
 
 document.getElementById('course-badge').textContent=courses.length;
 document.getElementById('gc-sub').textContent=courses.length+' courses \u00b7 Ontario';
