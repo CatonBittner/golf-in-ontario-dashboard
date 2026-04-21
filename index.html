@@ -767,13 +767,19 @@ var cddOpen = false;
 function buildCDDList(){
   var list = document.getElementById('cdd-list');
   if(!list) return;
-  var h = '';
+  list.innerHTML = '';
+  var curVal = document.getElementById('gc-region').value;
   CDD_REGIONS.forEach(function(r, i){
     var val = i === 0 ? '' : r;
-    var sel = document.getElementById('gc-region').value === val;
-    h += '<div class="cdd-item'+(sel?' selected':'')+'" onclick="pickCDDRegion(''+val+'',''+r+'')">'+r+'</div>';
+    var el = document.createElement('div');
+    el.className = 'cdd-item' + (curVal === val ? ' selected' : '');
+    el.textContent = r;
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      pickCDDRegion(val, r);
+    });
+    list.appendChild(el);
   });
-  list.innerHTML = h;
 }
 
 function toggleCDD(e){
