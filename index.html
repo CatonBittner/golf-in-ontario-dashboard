@@ -49,12 +49,13 @@ body{overflow:hidden;}
   .cal-ctrl{flex-direction:column;align-items:flex-start;gap:10px;}
   .stat-row{grid-template-columns:repeat(2,1fr);}
   #gc-panels{flex-direction:column;height:auto!important;overflow:visible!important;}
-  #gc-left{width:100%;min-width:0;border-right:none;border-bottom:none;max-height:none!important;overflow:visible!important;}
-  #gc-lh{position:sticky;top:0;z-index:10;background:var(--bg1);}
-  #gc-list{max-height:none!important;overflow-y:visible!important;}
-  #gc-right{min-height:60vh;border-top:1px solid var(--b1);}
-  #page-courses{overflow:visible!important;}
-  #gc-empty{min-height:200px;}
+  #gc-left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--b1);max-height:none!important;overflow:visible!important;height:auto!important;}
+  #gc-lh{position:sticky;top:52px;z-index:10;background:var(--bg1);}
+  #gc-list{max-height:none!important;overflow:visible!important;height:auto!important;}
+  #gc-right{min-height:0!important;height:auto!important;overflow:visible!important;flex:none!important;}
+  #gc-empty{display:none!important;}
+  #gc-detail{display:block!important;}
+  #page-courses{overflow:visible!important;height:auto!important;}
   #day-panel{width:100%;right:-110%;}
   #day-panel.open{right:0;}
   .cal-grid{display:none!important;}
@@ -364,6 +365,7 @@ body{overflow:hidden;}
         <div id="gc-detail" style="display:none;"></div>
       </div>
     </div>
+  <div id="mob-course-detail" style="display:none;padding:0 0 40px;"></div>
   </div>
 </div>
 
@@ -717,16 +719,17 @@ function pickCourse(idx){
   selC=courses[idx]||null;
   renderCourses();
   showCourse();
-  // on mobile, scroll down to the detail panel
-  if(window.innerWidth<=768){
-    var right=document.getElementById('gc-right');
-    if(right){setTimeout(function(){right.scrollIntoView({behavior:'smooth',block:'start'});},80);}
-  }
 }
+function isMobile(){return window.innerWidth<=768;}
 function showCourse(){
   var empty=document.getElementById('gc-empty'),detail=document.getElementById('gc-detail');
-  if(!selC){empty.style.display='flex';detail.style.display='none';return;}
-  empty.style.display='none';detail.style.display='block';
+  var mobDetail=document.getElementById('mob-course-detail');
+  if(!selC){
+    if(empty)empty.style.display='flex';
+    if(detail)detail.style.display='none';
+    if(mobDetail)mobDetail.style.display='none';
+    return;
+  }
   var c=selC,words=c.name.toLowerCase().split(' ').slice(0,2).join(' ');
   var rel=posts.filter(function(p){return p.caption.toLowerCase().indexOf(words)>=0;});
   var embed='';
@@ -742,7 +745,7 @@ function showCourse(){
     embed='<div class="nfbox"><div style="font-size:28px;opacity:.2;margin-bottom:10px;">&#128193;</div>'
       +'<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px;">No footage yet</div>'
       +'<div style="font-size:12px;color:var(--t3);line-height:1.7;max-width:420px;margin:0 auto 14px;">Paste a Google Drive folder share link to link footage for <strong style="color:var(--t1)">'+c.name+'</strong>.</div>'
-      +'<div class="dl-row"><input type="text" id="dl-input" placeholder="Paste Google Drive folder link\u2026">'
+      +'<div class="dl-row"><input type="text" id="dl-input" placeholder="Paste Google Drive folder link…">'
       +'<button class="btn bg" onclick="linkFolder()">Link Folder</button></div>'
       +'<div id="dl-msg" style="margin-top:10px;font-size:11px;color:var(--t3);">&#128161; In Google Drive: right-click folder &#8594; Share &#8594; Copy link</div></div>';
   }
@@ -752,9 +755,7 @@ function showCourse(){
     rel.forEach(function(p){relH+='<div class="gdpr"><div class="gdpdot" style="background:'+sttColor(p.status)+'"></div><div class="gdpcap">'+p.caption+'</div><div class="gdpdate">'+fmtShort(p.date)+'</div><div class="ib" onclick="openModal(null,'+p.id+')" style="margin-left:8px;">&#9999;</div></div>';});
     relH+='</div>';
   }else{relH='<div class="noposts">No tagged posts for this course yet.</div>';}
-  var backBtn='<button onclick="clearCourse()" style="display:none;" id="gc-back" class="btn bgh" style="margin-bottom:14px;">&#8592; Back to courses</button>';
-  if(window.innerWidth<=768){backBtn='<button onclick="clearCourse()" class="btn bgh" style="margin:16px 28px 0;display:flex;">&#8592; Back to list</button>';}
-  detail.innerHTML=backBtn+'<div style="padding:24px 28px;">'
+  var innerHTML='<div style="padding:16px 16px 24px;">'
     +'<div class="gdhdr"><div><div class="gdname">'+c.name+'</div><div class="gdreg">&#128205; '+c.region+' &middot; Ontario</div></div>'
     +'<span class="fbadge '+(c.footage?'fyes':'fno')+'">'+(c.footage?'&#9679; Has Footage':'&#9675; No Footage Yet')+'</span></div>'
     +embed
@@ -763,6 +764,19 @@ function showCourse(){
     +'<div class="gdstat"><div class="gdsl">Region</div><div class="gdsv" style="font-size:11px;line-height:1.6;margin-top:5px;">'+c.region+'</div></div>'
     +'<div class="gdstat"><div class="gdsl">Footage</div><div class="gdsv" style="font-size:12px;margin-top:6px;color:'+(c.footage?'var(--green)':'var(--t3)')+';">'+(c.footage?'Available':'Pending')+'</div></div>'
     +'</div>'+relH+'</div>';
+  if(isMobile()){
+    if(empty)empty.style.display='none';
+    if(detail)detail.style.display='none';
+    if(mobDetail){
+      mobDetail.innerHTML='<button onclick="clearCourse()" class="btn bgh" style="margin:16px 16px 8px;display:inline-flex;">&#8592; Back to list</button>'+innerHTML;
+      mobDetail.style.display='block';
+      setTimeout(function(){mobDetail.scrollIntoView({behavior:'smooth',block:'start'});},80);
+    }
+  } else {
+    if(mobDetail)mobDetail.style.display='none';
+    if(empty)empty.style.display='none';
+    if(detail){detail.style.display='block';detail.innerHTML=innerHTML;}
+  }
 }
 function clearCourse(){
   selC=null;
