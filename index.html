@@ -635,7 +635,7 @@ function renderAgenda(){
     var cls='mob-cal-day'+(isT?' today':'')+(isSel?' selected':'')+(dp.length?' has-post':'');
     var pills='';
     dp.slice(0,3).forEach(function(p){pills+='<div class="mob-pill '+typeInfo(p.type).cls+'"></div>';});
-    gridH+='<div class="'+cls+'" onclick="mobPickDate(''+ds+'')">'
+    gridH+='<div class="'+cls+'" data-mobdate="'+ds+'">'
       +'<div class="mob-cal-num">'+d+'</div>'
       +'<div class="mob-cal-pills">'+pills+'</div>'
       +'</div>';
@@ -664,7 +664,7 @@ function buildMobSheet(ds){
     dp.forEach(function(p){
       var ti=typeInfo(p.type),sc=sttColor(p.status);
       var cap=p.caption.length>160?p.caption.slice(0,160)+'…':p.caption;
-      h+='<div class="mob-event '+ti.cls+'" onclick="openModal(null,'+p.id+')">'
+      h+='<div class="mob-event '+ti.cls+'" data-openpid="'+p.id+'">'
         +'<div class="mob-event-top">'
         +'<span class="mob-event-ico">'+ti.ico+'</span>'
         +'<span class="mob-event-type '+ti.cls+'">'+ti.lbl+'</span>'
@@ -672,12 +672,12 @@ function buildMobSheet(ds){
         +'</div>'
         +'<div class="mob-event-cap">'+cap+'</div>'
         +'<div class="mob-event-actions">'
-        +'<button class="btn bgh" style="font-size:11px;padding:5px 11px;" onclick="event.stopPropagation();openModal(null,'+p.id+')">&#9999; Edit</button>'
-        +'<button class="btn brd" style="font-size:11px;padding:5px 11px;" onclick="event.stopPropagation();quickDel('+p.id+')">&#128465;</button>'
+        +'<button class="btn bgh" style="font-size:11px;padding:5px 11px;" data-editpid="'+p.id+'">&#9999; Edit</button>'
+        +'<button class="btn brd" style="font-size:11px;padding:5px 11px;" data-delpid="'+p.id+'">&#128465;</button>'
         +'</div></div>';
     });
   }
-  h+='<button class="mob-sheet-add" onclick="openModal(''+ds+'',null)">+ Add post</button>';
+  h+='<button class="mob-sheet-add" data-adddate="'+ds+'">+ Add post</button>';
   return h;
 }
 
@@ -737,7 +737,18 @@ document.addEventListener('click',function(e){
   var add=e.target.closest('[data-add]');
   if(add){e.stopPropagation();openModal(add.getAttribute('data-add'),null);return;}
   var day=e.target.closest('[data-ds]');
-  if(day){openDP(day.getAttribute('data-ds'));}
+  if(day){openDP(day.getAttribute('data-ds'));return;}
+  // mobile calendar handlers
+  var mobDate=e.target.closest('[data-mobdate]');
+  if(mobDate){e.stopPropagation();mobPickDate(mobDate.getAttribute('data-mobdate'));return;}
+  var openPid=e.target.closest('[data-openpid]');
+  if(openPid){e.stopPropagation();openModal(null,Number(openPid.getAttribute('data-openpid')));return;}
+  var editPid=e.target.closest('[data-editpid]');
+  if(editPid){e.stopPropagation();openModal(null,Number(editPid.getAttribute('data-editpid')));return;}
+  var delPid=e.target.closest('[data-delpid]');
+  if(delPid){e.stopPropagation();quickDel(Number(delPid.getAttribute('data-delpid')));return;}
+  var addDate=e.target.closest('[data-adddate]');
+  if(addDate){e.stopPropagation();openModal(addDate.getAttribute('data-adddate'),null);return;}
 });
 
 function openDP(ds){dpDate=ds;document.getElementById('dp-title').textContent=fmtLong(ds);document.getElementById('dp-add-btn').textContent='+ Add Post \u2014 '+fmtShort(ds);renderDP();document.getElementById('day-panel').classList.add('open');}
