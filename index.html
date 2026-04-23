@@ -112,6 +112,7 @@ body{overflow:hidden;}
 .mob-pill.cca{background:#3b82f6;}
 .mob-pill.cph{background:#14b8a6;}
 .mob-pill.cst{background:#f59e0b;}
+.mob-pill.cem{background:#22c55e;}
 .mob-pill.cig{background:var(--green);}
 /* day detail sheet */
 .mob-day-sheet{flex:1;border-top:1px solid var(--b1);padding:14px 14px 40px;overflow-y:auto;}
@@ -123,6 +124,7 @@ body{overflow:hidden;}
 .mob-event.cph{background:rgba(20,184,166,.15);}
 .mob-event.cst{background:rgba(245,158,11,.15);}
 .mob-event.cig{background:var(--gd);}
+.mob-event.cem{background:rgba(34,197,94,.15);}
 .mob-event-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .mob-event-ico{font-size:16px;}
 .mob-event-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
@@ -131,6 +133,7 @@ body{overflow:hidden;}
 .mob-event-type.cph{color:#5eead4;}
 .mob-event-type.cst{color:#fcd34d;}
 .mob-event-type.cig{color:var(--green);}
+.mob-event-type.cem{color:#86efac;}
 .mob-event-stt{margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.25);}
 .mob-event-cap{font-size:13px;color:var(--t1);line-height:1.55;margin-bottom:10px;}
 .mob-event-actions{display:flex;gap:6px;}
@@ -204,6 +207,7 @@ body{overflow:hidden;}
 .cph{background:rgba(20,184,166,.14);color:#5eead4;}
 .cst{background:rgba(245,158,11,.14);color:#fcd34d;}
 .cig{background:rgba(225,48,108,.14);color:#f9a8d4;}
+.cem{background:rgba(34,197,94,.14);color:#86efac;}
 .cmo{font-size:9px;color:var(--t3);padding:2px 4px;font-family:var(--mono);}
 
 #day-panel{position:fixed;top:0;right:-400px;bottom:0;width:380px;background:var(--bg1);border-left:1px solid var(--b2);z-index:200;display:flex;flex-direction:column;transition:right .22s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.4);}
@@ -358,6 +362,7 @@ body{overflow:hidden;}
           <div class="cf" onclick="setFilter('carousel',this)">&#128193; Carousels</div>
           <div class="cf" onclick="setFilter('story',this)">&#128214; Stories</div>
           <div class="cf" onclick="setFilter('photo',this)">&#128247; Photos</div>
+          <div class="cf" onclick="setFilter('email',this)">&#128140; Emails</div>
         </div>
       </div>
       <div class="stat-row">
@@ -426,7 +431,7 @@ body{overflow:hidden;}
     <div class="mbod">
       <div class="fg"><label class="flbl">Caption / Idea</label><textarea class="fta" id="f-cap" placeholder="Write your caption or idea... #golfinontario"></textarea></div>
       <div class="frow">
-        <div class="fg"><label class="flbl">Post Type</label><select class="fsel" id="f-type"><option value="reel">Reel</option><option value="carousel">Carousel</option><option value="photo">Photo</option><option value="story">Story</option></select></div>
+        <div class="fg"><label class="flbl">Post Type</label><select class="fsel" id="f-type"><option value="reel">Reel</option><option value="carousel">Carousel</option><option value="photo">Photo</option><option value="story">Story</option><option value="email">Email</option></select></div>
         <div class="fg"><label class="flbl">Status</label><select class="fsel" id="f-status"><option value="backlog">Backlog</option><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div>
       </div>
       <div class="frow">
@@ -595,7 +600,7 @@ function goToday(){calDt=new Date();calDt.setDate(1);renderCal();}
 function setFilter(f,el){calFilter=f;document.querySelectorAll('.cf').forEach(function(x){x.classList.remove('on');});el.classList.add('on');renderCal();}
 function fmtShort(ds){if(!ds)return '-';return new Date(ds+'T12:00:00').toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});}
 function fmtLong(ds){return new Date(ds+'T12:00:00').toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});}
-function typeInfo(t){var m={reel:{cls:'crl',ico:'&#127916;',lbl:'Reel'},carousel:{cls:'cca',ico:'&#128193;',lbl:'Carousel'},photo:{cls:'cph',ico:'&#128247;',lbl:'Photo'},story:{cls:'cst',ico:'&#128214;',lbl:'Story'}};return m[t]||{cls:'cig',ico:'&#128204;',lbl:'Post'};}
+function typeInfo(t){var m={reel:{cls:'crl',ico:'&#127916;',lbl:'Reel'},carousel:{cls:'cca',ico:'&#128193;',lbl:'Carousel'},photo:{cls:'cph',ico:'&#128247;',lbl:'Photo'},story:{cls:'cst',ico:'&#128214;',lbl:'Story'},email:{cls:'cem',ico:'&#128140;',lbl:'Email'}};return m[t]||{cls:'cig',ico:'&#128204;',lbl:'Post'};}
 function sttColor(s){return s==='published'?'var(--green)':s==='scheduled'?'var(--blue)':s==='draft'?'var(--amber)':'var(--t3)';}
 function updateStats(){['scheduled','draft','published','backlog'].forEach(function(s){var e=document.getElementById('st-'+s);if(e)e.textContent=posts.filter(function(p){return p.status===s;}).length;});}
 
